@@ -1,15 +1,16 @@
 'use client';
 
+import { type VariantProps } from 'class-variance-authority';
 import {
   BarVisualizer,
   type TrackReferenceOrPlaceholder,
   useTrackToggle,
 } from '@livekit/components-react';
-import { TrackDeviceSelect } from '@/components/livekit/agent-control-bar/track-device-select';
-import { TrackToggle } from '@/components/livekit/agent-control-bar/track-toggle';
+import { TrackDeviceSelect } from '@/components/livekit/track-device-select';
+import { TrackToggle, type toggleVariants } from '@/components/livekit/track-toggle';
 import { cn } from '@/lib/utils';
 
-interface TrackSelectorProps {
+interface TrackSelectorProps extends VariantProps<typeof toggleVariants> {
   kind: MediaDeviceKind;
   source: Parameters<typeof useTrackToggle>[0]['source'];
   pressed?: boolean;
@@ -24,6 +25,7 @@ interface TrackSelectorProps {
 
 export function TrackSelector({
   kind,
+  variant,
   source,
   pressed,
   pending,
@@ -37,8 +39,7 @@ export function TrackSelector({
   return (
     <div className={cn('flex items-center gap-0', className)}>
       <TrackToggle
-        size="icon"
-        variant="primary"
+        variant={variant}
         source={source}
         pressed={pressed}
         pending={pending}
@@ -49,13 +50,13 @@ export function TrackSelector({
         {audioTrackRef && (
           <BarVisualizer
             barCount={3}
+            track={audioTrackRef}
             options={{ minHeight: 5 }}
-            trackRef={audioTrackRef}
             className="audiovisualizer flex h-6 w-auto items-center justify-center gap-0.5"
           >
             <span
               className={cn([
-                'h-full w-0.5 origin-center rounded-2xl',
+                'h-full w-0.5 origin-center',
                 'group-data-[state=on]/track:bg-foreground group-data-[state=off]/track:bg-destructive',
                 'data-lk-muted:bg-muted',
               ])}
@@ -63,19 +64,17 @@ export function TrackSelector({
           </BarVisualizer>
         )}
       </TrackToggle>
-      <hr className="bg-border peer-data-[state=off]/track:bg-destructive/20 relative z-10 -mr-px hidden h-4 w-px border-none has-[~_button]:block" />
       <TrackDeviceSelect
         size="sm"
         kind={kind}
+        variant={variant}
         requestPermissions={false}
         onMediaDeviceError={onMediaDeviceError}
         onActiveDeviceChange={onActiveDeviceChange}
         className={cn([
-          'rounded-l-none pl-2',
-          'peer-data-[state=off]/track:text-destructive',
-          'hover:text-foreground focus:text-foreground',
-          'hover:peer-data-[state=off]/track:text-foreground',
-          'focus:peer-data-[state=off]/track:text-destructive',
+          'relative',
+          'before:bg-border before:absolute before:inset-y-0 before:-left-px before:my-2.5 before:w-px has-[~_button]:before:content-[""]',
+          !pressed && 'before:bg-destructive/20',
         ])}
       />
     </div>
